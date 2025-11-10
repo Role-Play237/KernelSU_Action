@@ -242,11 +242,12 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
           
-          # Отключаем проблемный драйвер aw882xx
-          echo "# CONFIG_SND_SOC_AW882XX is not set" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+          # Отключаем превращение предупреждений в ошибки
+          echo "CONFIG_WERROR=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
           
-          # Отключаем zram чтобы избежать ошибки компиляции
-          echo "# CONFIG_ZRAM is not set" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+          # Отключаем проблемные драйверы
+          echo "# CONFIG_SND_SOC_AW882XX is not set" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
+          echo "# CONFIG_MTK_DVFSRC is not set" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
           
           # Существующие настройки KernelSU
           if [ ${{ env.APPLY_KSU_PATCH }} = true ]; then
@@ -280,6 +281,7 @@ jobs:
           if [ ${{ env.DISABLE_CC_WERROR }} = true ]; then
             echo "CONFIG_CC_WERROR=n" >> arch/${{ env.ARCH }}/configs/${{ env.KERNEL_CONFIG }}
           fi
+        
       - name: Setup ccache
         if: env.ENABLE_CCACHE == 'true'
         uses: hendrikmuhs/ccache-action@v1.2
