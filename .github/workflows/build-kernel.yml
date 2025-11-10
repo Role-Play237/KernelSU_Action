@@ -120,18 +120,27 @@ jobs:
         run: >
           cd $GITHUB_WORKSPACE/kernel_workspace
 
-          if [[ ${{ env.CUSTOM_CLANG_SOURCE }} =~ git ]]; then
-              if [[ ${{ env.CUSTOM_CLANG_SOURCE }} == *'.tar.gz' ]]; then
-                  wget -O clang.tar.gz ${{ env.CUSTOM_CLANG_SOURCE }}
-                  mkdir clang-aosp
-                  tar -C clang-aosp/ -zxvf clang.tar.gz
-              else
-                  git clone ${{ env.CUSTOM_CLANG_SOURCE }} -b ${{ env.CUSTOM_CLANG_BRANCH }} clang-aosp --depth=1
-              fi
+          mkdir clang-aosp
+
+
+          echo "Downloading Clang from: ${{ env.CUSTOM_CLANG_SOURCE }}"
+
+
+          # Скачиваем как tar.gz и распаковываем правильно
+
+          wget -O clang.tar.gz "${{ env.CUSTOM_CLANG_SOURCE }}"
+
+
+          # Проверяем что файл скачался
+
+          if [ -f "clang.tar.gz" ]; then
+            echo "Clang downloaded successfully, file size: $(ls -lh clang.tar.gz | awk '{print $5}')"
+            echo "Extracting tar.gz archive..."
+            tar -C clang-aosp/ -zxvf clang.tar.gz
+            echo "Clang extraction completed"
           else
-              wget -O clang.zip ${{ env.CUSTOM_CLANG_SOURCE }}
-              mkdir clang-aosp
-              unzip clang.zip -d clang-aosp/
+            echo "ERROR: Clang download failed"
+            exit 1
           fi
       - name: Download Gcc-aosp
         if: env.USE_CUSTOM_GCC_64 != 'true' || env.USE_CUSTOM_GCC_32 != 'true'
